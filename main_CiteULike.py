@@ -13,7 +13,7 @@ from tqdm import tqdm
 import pickle
 
 np.random.seed(0)
-tf.set_random_seed(0)
+tf.compat.v1.set_random_seed(0)
 
 
 def main():
@@ -58,21 +58,21 @@ def main():
                                model_select=model_select,
                                rank_out=rank_out, reg=args.reg, alpha=args.alpha, dim=args.dim)
 
-    config = tf.ConfigProto(allow_soft_placement=True)
+    config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 
     heater.build_model()
     heater.build_predictor(recall_at)
 
-    with tf.Session(config=config) as sess:
-        tf.global_variables_initializer().run()
-        tf.local_variables_initializer().run()
+    with tf.compat.v1.Session(config=config) as sess:
+        tf.compat.v1.global_variables_initializer().run()
+        tf.compat.v1.local_variables_initializer().run()
         timer.toc('initialized tf')
 
         n_step = 0
         best_recall = 0
         best_test_recall = 0
         best_step = 0
-        tf.local_variables_initializer().run()
+        tf.compat.v1.local_variables_initializer().run()
         for epoch in range(num_epoch):
             user_array, item_array, target_array = utils.negative_sampling(user_list, item_list, neg, item_warm)
             random_idx = np.random.permutation(user_array.shape[0])

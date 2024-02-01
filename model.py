@@ -7,14 +7,14 @@ def l2_norm(para):
 
 
 def dense_batch_fc_tanh(x, units, is_training, scope, do_norm=False):
-    with tf.variable_scope(scope):
-        init = tf.truncated_normal_initializer(stddev=0.01)
-        h1_w = tf.get_variable(scope + '_w',
+    with tf.compat.v1.variable_scope(scope):
+        init = tf.compat.v1.truncated_normal_initializer(stddev=0.01)
+        h1_w = tf.compat.v1.get_variable(scope + '_w',
                                shape=[x.get_shape().as_list()[1], units],
                                initializer=init)
-        h1_b = tf.get_variable(scope + '_b',
+        h1_b = tf.compat.v1.get_variable(scope + '_b',
                                shape=[1, units],
-                               initializer=tf.zeros_initializer())
+                               initializer=tf.compat.v1.zeros_initializer())
         h1 = tf.matmul(x, h1_w) + h1_b
         if do_norm:
             h2 = tf.contrib.layers.batch_norm(
@@ -30,14 +30,14 @@ def dense_batch_fc_tanh(x, units, is_training, scope, do_norm=False):
 
 
 def dense_fc(x, units, scope):
-    with tf.variable_scope(scope):
-        init = tf.truncated_normal_initializer(stddev=0.01)
-        h1_w = tf.get_variable(scope + '_w',
+    with tf.compat.v1.variable_scope(scope):
+        init = tf.compat.v1.truncated_normal_initializer(stddev=0.01)
+        h1_w = tf.compat.v1.get_variable(scope + '_w',
                                shape=[x.get_shape().as_list()[1], units],
                                initializer=init)
-        h1_b = tf.get_variable(scope + '_b',
+        h1_b = tf.compat.v1.get_variable(scope + '_b',
                                shape=[1, units],
-                               initializer=tf.zeros_initializer())
+                               initializer=tf.compat.v1.zeros_initializer())
         h1 = tf.matmul(x, h1_w) + h1_b
         return h1, l2_norm(h1_w) + l2_norm(h1_b)
 
@@ -88,19 +88,19 @@ class Heater:
         self.eval_preds_cold = None  # the top-k predicted indices for cold evaluation
 
     def build_model(self):
-        self.lr_placeholder = tf.placeholder(tf.float32, shape=[], name='learn_rate')
-        self.is_training = tf.placeholder(tf.bool, name='is_training')
-        self.target = tf.placeholder(tf.float32, shape=[None], name='target')
+        self.lr_placeholder = tf.compat.v1.placeholder(tf.float32, shape=[], name='learn_rate')
+        self.is_training = tf.compat.v1.placeholder(tf.bool, name='is_training')
+        self.target = tf.compat.v1.placeholder(tf.float32, shape=[None], name='target')
 
-        self.Uin = tf.placeholder(tf.float32, shape=[None, self.rank_in], name='U_in_raw')
-        self.Vin = tf.placeholder(tf.float32, shape=[None, self.rank_in], name='V_in_raw')
+        self.Uin = tf.compat.v1.placeholder(tf.float32, shape=[None, self.rank_in], name='U_in_raw')
+        self.Vin = tf.compat.v1.placeholder(tf.float32, shape=[None, self.rank_in], name='V_in_raw')
 
         dim = self.dim
         self.reg_loss = 0.
 
         if self.phi_v_dim > 0:
-            self.Vcontent = tf.placeholder(tf.float32, shape=[None, self.phi_v_dim], name='V_content')
-            self.dropout_item_indicator = tf.placeholder(tf.float32, shape=[None, 1], name='dropout_item_indicator')
+            self.Vcontent = tf.compat.v1.placeholder(tf.float32, shape=[None, self.phi_v_dim], name='V_content')
+            self.dropout_item_indicator = tf.compat.v1.placeholder(tf.float32, shape=[None, 1], name='dropout_item_indicator')
 
             vcontent_gate, vcontent_gate_reg = dense_fc(self.Vcontent, dim,
                                                         'vcontent_gate_layer')  # size: batch_size X dim
@@ -134,8 +134,8 @@ class Heater:
             diff_item_loss = 0
 
         if self.phi_u_dim > 0:
-            self.Ucontent = tf.placeholder(tf.float32, shape=[None, self.phi_u_dim], name='U_content')
-            self.dropout_user_indicator = tf.placeholder(tf.float32, shape=[None, 1], name='dropout_user_indicator')
+            self.Ucontent = tf.compat.v1.placeholder(tf.float32, shape=[None, self.phi_u_dim], name='U_content')
+            self.dropout_user_indicator = tf.compat.v1.placeholder(tf.float32, shape=[None, 1], name='dropout_user_indicator')
 
             ucontent_gate, ucontent_gate_reg = dense_fc(self.Ucontent, dim,
                                                         'ucontent_gate_layer')  # size: batch_size X dim
@@ -176,14 +176,14 @@ class Heater:
             self.reg_loss += u_reg
             self.reg_loss += v_reg
 
-        with tf.variable_scope("U_embedding"):
-            u_emb_w = tf.Variable(tf.truncated_normal([u_last.get_shape().as_list()[1], self.rank_out], stddev=0.01),
+        with tf.compat.v1.variable_scope("U_embedding"):
+            u_emb_w = tf.Variable(tf.random.truncated_normal([u_last.get_shape().as_list()[1], self.rank_out], stddev=0.01),
                                   name='u_emb_w')
             u_emb_b = tf.Variable(tf.zeros([1, self.rank_out]), name='u_emb_b')
             self.U_embedding = tf.matmul(u_last, u_emb_w) + u_emb_b
 
-        with tf.variable_scope("V_embedding"):
-            v_emb_w = tf.Variable(tf.truncated_normal([v_last.get_shape().as_list()[1], self.rank_out], stddev=0.01),
+        with tf.compat.v1.variable_scope("V_embedding"):
+            v_emb_w = tf.Variable(tf.random.truncated_normal([v_last.get_shape().as_list()[1], self.rank_out], stddev=0.01),
                                   name='v_emb_w')
             v_emb_b = tf.Variable(tf.zeros([1, self.rank_out]), name='v_emb_b')
             self.V_embedding = tf.matmul(v_last, v_emb_w) + v_emb_b
@@ -191,24 +191,24 @@ class Heater:
         self.reg_loss += (l2_norm(v_emb_w) + l2_norm(v_emb_b) + l2_norm(u_emb_w) + l2_norm(u_emb_b))
         self.reg_loss *= self.reg
 
-        with tf.variable_scope("loss"):
+        with tf.compat.v1.variable_scope("loss"):
             preds = tf.multiply(self.U_embedding, self.V_embedding)
             self.preds = tf.reduce_sum(preds, 1)  # output of the model, the predicted scores
             self.diff_loss = diff_item_loss + diff_user_loss
-            self.loss = tf.reduce_mean(tf.squared_difference(self.preds, self.target)) + self.reg_loss + self.diff_loss
+            self.loss = tf.reduce_mean(tf.math.squared_difference(self.preds, self.target)) + self.reg_loss + self.diff_loss
 
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             # Ensures that we execute the update_ops before performing the train_step
-            self.optimizer = tf.train.MomentumOptimizer(self.lr_placeholder, 0.9).minimize(self.loss)
+            self.optimizer = tf.compat.v1.train.MomentumOptimizer(self.lr_placeholder, 0.9).minimize(self.loss)
 
     def build_predictor(self, recall_at):
-        self.eval_trainR = tf.sparse_placeholder(
+        self.eval_trainR = tf.compat.v1.sparse_placeholder(
             dtype=tf.float32, shape=[None, None], name='trainR_sparse')
 
-        with tf.variable_scope("eval"):
+        with tf.compat.v1.variable_scope("eval"):
             embedding_prod_cold = tf.matmul(self.U_embedding, self.V_embedding, transpose_b=True, name='pred_all_items')
-            embedding_prod_warm = tf.sparse_add(embedding_prod_cold, self.eval_trainR)
+            embedding_prod_warm = tf.sparse.add(embedding_prod_cold, self.eval_trainR)
             _, self.eval_preds_cold = tf.nn.top_k(embedding_prod_cold, k=recall_at[-1], sorted=True,
                                                   name='topK_net_cold')
             _, self.eval_preds_warm = tf.nn.top_k(embedding_prod_warm, k=recall_at[-1], sorted=True,

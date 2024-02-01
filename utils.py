@@ -188,7 +188,7 @@ def batch_eval_recall(_sess, tf_eval, eval_feed_dict, recall_k, eval_data):
                                       batch, eval_start, eval_stop, eval_data))
         tf_eval_preds_batch.append(tf_eval_preds)
     tf_eval_preds = np.concatenate(tf_eval_preds_batch)
-    tf.local_variables_initializer().run()
+    tf.compat.v1.local_variables_initializer().run()
 
     # filter non-zero targets
     y_nz = [len(x) > 0 for x in eval_data.R_test_inf.rows]
@@ -243,7 +243,7 @@ def batch_eval_store(_sess, tf_eval, eval_feed_dict, eval_data):
                                       batch, eval_start, eval_stop, eval_data))
         tf_eval_preds_batch.append(tf_eval_preds)
     tf_eval_preds = np.concatenate(tf_eval_preds_batch)
-    tf.local_variables_initializer().run()
+    tf.compat.v1.local_variables_initializer().run()
 
     np.save('./data/pred_R.npy', tf_eval_preds)
 
@@ -275,7 +275,7 @@ def evaluate(_sess, tf_eval, eval_feed_dict, eval_data, like, filters, recall_k,
                                       batch, eval_start, eval_stop, eval_data))
         tf_eval_preds_batch.append(tf_eval_preds)
     tf_eval_preds = np.concatenate(tf_eval_preds_batch)
-    tf.local_variables_initializer().run()
+    tf.compat.v1.local_variables_initializer().run()
 
     test = pd.read_csv(test_file, dtype=np.int32)
 
