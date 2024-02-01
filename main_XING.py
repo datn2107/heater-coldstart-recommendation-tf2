@@ -14,6 +14,7 @@ import scipy.sparse
 
 np.random.seed(0)
 tf.compat.v1.set_random_seed(0)
+tf.compat.v1.disable_eager_execution()
 
 
 def main():

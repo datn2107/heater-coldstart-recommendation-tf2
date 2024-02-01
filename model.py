@@ -17,13 +17,14 @@ def dense_batch_fc_tanh(x, units, is_training, scope, do_norm=False):
                                initializer=tf.compat.v1.zeros_initializer())
         h1 = tf.matmul(x, h1_w) + h1_b
         if do_norm:
-            h2 = tf.contrib.layers.batch_norm(
-                h1,
-                decay=0.9,
-                center=True,
-                scale=True,
-                is_training=is_training,
-                scope=scope + '_bn')
+            # h2 = tf.contrib.layers.batch_norm(
+            #     h1,
+            #     decay=0.9,
+            #     center=True,
+            #     scale=True,
+            #     is_training=is_training,
+            #     scope=scope + '_bn')
+            h2 = tf.keras.layers.BatchNormalization()(h1, training=is_training)
             return tf.nn.tanh(h2, scope + '_tanh'), l2_norm(h1_w) + l2_norm(h1_b)
         else:
             return tf.nn.tanh(h1, scope + '_tanh'), l2_norm(h1_w) + l2_norm(h1_b)
