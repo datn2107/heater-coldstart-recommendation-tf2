@@ -227,7 +227,7 @@ def batch_eval_recall(_sess, tf_eval, eval_feed_dict, recall_k, eval_data):
         y_csr = y.tocsr()
         dcg_array = y_csr[(rows, cols)].A1.reshape((preds_k.shape[0], -1))
         dcg = np.sum(dcg_array * idcg_array[:at_k].reshape((1, -1)), axis=1)
-        idcg = np.sum(y, axis=1) - 1
+        idcg = np.squeeze(np.sum(y, axis=1) - 1)
         idcg[np.where(idcg >= at_k)] = at_k-1
         idcg = idcg_table[idcg.astype(int)]
         ndcg.append(np.mean(dcg / idcg))
