@@ -170,6 +170,16 @@ for i in range(100):
     idcg_table[i] = np.sum(idcg_array[:(i + 1)])
 
 
+def convert_np_array_2d_to_np_array_list(x):
+    x = x.tolist()
+    x.append([])
+
+    x = np.array(x, dtype=list)
+    x = np.delete(x, -1)
+
+    return x
+
+
 def batch_eval_recall(_sess, tf_eval, eval_feed_dict, recall_k, eval_data):
     """
     given EvalData and DropoutNet compute graph in TensorFlow, runs batch evaluation
@@ -200,12 +210,12 @@ def batch_eval_recall(_sess, tf_eval, eval_feed_dict, recall_k, eval_data):
     precision = []
     ndcg = []
     for at_k in recall_k:
-        preds_k = preds_all[:, :at_k]
+        preds_k = convert_np_array_2d_to_np_array_list(preds_all[:, :at_k])
         y = eval_data.R_test_inf[y_nz, :]
 
         x = scipy.sparse.lil_matrix(y.shape)
         x.rows = preds_k
-        x.data = np.ones_like(preds_k)
+        x.data = convert_np_array_2d_to_np_array_list(np.ones_like(preds_all[:, :at_k]))
 
         z = y.multiply(x)
         recall.append(np.mean(np.divide((np.sum(z, 1)), np.sum(y, 1))))
